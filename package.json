@@ -1,0 +1,12 @@
+{
+    "name": "photoViewer"
+  , "version": "0.0.1"
+  , "private": true
+  , "dependencies": {
+      "coffee-script" : "latest",
+      "emailjs": "latest",
+      "node-schedule" : "latest",
+      "watch" : "latest",
+      "datejs" : "latest"
+  }
+}
