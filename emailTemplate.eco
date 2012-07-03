@@ -1,0 +1,10 @@
+<html>
+  <head>
+
+  </head>
+  <body>
+    <h1>Welcome from the Adler</h1>
+    <p> This is your photograph from <%=@location%> it was sent on <%=@sentDate.format("dddd, MMMM Do YYYY, h:mm:ss a");%> and has been travling through space for <%= (@sendDate - @sentDate)/1000.0/60.0/60.0 %> hours</p>
+  </body>
+</html>
+
