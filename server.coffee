@@ -1,31 +1,41 @@
-watch = require('watch')
-email = require('emailjs')
-schedule= require('node-schedule')
-require('datejs')
+watch     = require 'watch'
+schedule  = require 'node-schedule'
+eco       = require 'eco'
+fs        = require 'fs'
 
-parseDataEmail = (filename)=>
-  emailAddress = filename.split("_")[0]
-  dateTime = new Date(filename.split("_")[1])
-  {email: emailAddress.split("/")[1], date: dateTime}
+moment    = require('moment')
+
+delays       = require('./delays')
+emailServer  = require('./emailConfig')
+template     = fs.readFileSync 'emailTemplate.eco', 'utf-8'
+
+parseDetails = (filename)=>
+  console.log "parsting #{filename}"
+  sentDate  = moment(filename.split("_")[1] , "YYYY.M.DD-HH.mm.SS")
+  location  = filename.split("_")[2]
+
+  email     : filename.split("_")[0].split("/")[1]
+  sentDate  : sentDate
+  location  : location
+  sendDate  : sentDate.add('hours', delays[location]);
 
 
-server  = email.server.connect
-   user:    "adlerphotoemail" 
-   password:"adlerPhotoEmail"
-   host:    "smtp.gmail.com"
-   ssl:     true
+scheduleEmail = (details)=>
+  console.log "seding at #{details.sendDate.format('YYYY.M.DD-HH.mm.SS')}"
+  schedule.scheduleJob details.sendDate.utc(), =>
+    console.log "sending to #{details.email}"
+    emailServer.send
+      text:    eco.render templage, details
+      from:    "The adler <username@gmail.com>"
+      to:      details.email
+      subject: "Your Blast From the Past"
+    , (err, message)=>
+      console.log err || message
 
 
 watch.createMonitor 'pics', (monitor)=> 
   monitor.on "created", (f,stat)=>
-    details = parseDataEmail(f)
+    details = parseDetails(f)
     console.log "scheduling email"
-    schedule.scheduleJob details.date, =>
-      console.log "sending to #{details.email}"
-      server.send
-        text:    "i hope this works"
-        from:    "The adler <username@gmail.com>"
-        to:      details.email
-        subject: "testing emailjs"
-      , (err, message)=>
-        console.log err || message
+    scheduleEmail details
+   
